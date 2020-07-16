@@ -555,6 +555,7 @@ vim-scripts/emodeline
 vim-scripts/gitignore.vim
 vim-scripts/Improved-AnsiEsc
 vim-scripts/jdaddy.vim
+vim-scripts/localvimrc
 vim-scripts/matchit.zip
 vim-scripts/mayansmoke
 vim-scripts/PreserveNoEOL

@@ -2158,6 +2158,18 @@ let
     meta.homepage = "https://github.com/junegunn/limelight.vim/";
   };
 
+  localvimrc = buildVimPluginFrom2Nix {
+    pname = "localvimrc";
+    version = "2014-02-22";
+    src = fetchFromGitHub {
+      owner = "vim-scripts";
+      repo = "localvimrc";
+      rev = "3f81e1800ab085a6b5c7688f8a624c6d70085c22";
+      sha256 = "01iiws9wydirsmh5ad1vpqff0dxnw5gcsxkm6mf3gy22c2lgjvw1";
+    };
+    meta.homepage = "https://github.com/vim-scripts/localvimrc/";
+  };
+
   lushtags = buildVimPluginFrom2Nix {
     pname = "lushtags";
     version = "2017-04-19";
