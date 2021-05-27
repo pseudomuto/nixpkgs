@@ -1,4 +1,4 @@
-{ stdenv, fetchFromGitHub }:
+{ lib, stdenv, fetchFromGitHub, cmake }:
 
 stdenv.mkDerivation rec {
   pname = "lzfse";
@@ -11,11 +11,9 @@ stdenv.mkDerivation rec {
     sha256 = "1mfh6y6vpvxsdwmqmfbkqkwvxc0pz2dqqc72c6fk9sbsrxxaghd5";
   };
 
-  makeFlags = [ "INSTALL_PREFIX=$(out)" ];
+  nativeBuildInputs = [ cmake ];
 
-  enableParallelBuilding = false; #bug
-
-  meta = with stdenv.lib; {
+  meta = with lib; {
     homepage = "https://github.com/lzfse/lzfse";
     description = "a reference C implementation of the LZFSE compressor";
     longDescription = ''

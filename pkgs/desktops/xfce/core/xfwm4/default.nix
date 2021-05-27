@@ -5,9 +5,9 @@
 mkXfceDerivation {
   category = "xfce";
   pname = "xfwm4";
-  version = "4.14.4";
+  version = "4.16.1";
 
-  sha256 = "0nk3qw1accvxrzy00qs06nnlpxjv6p1srkvjn2ad4xrw9ix9ywkb";
+  sha256 = "1lhxm9ifkrnvn1vq3aak3kd695i1ishpryjnw617ifzawy9lj10b";
 
   nativeBuildInputs = [ exo librsvg ];
 

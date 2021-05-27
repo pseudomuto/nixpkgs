@@ -1,19 +1,21 @@
-{ buildGoModule, fetchFromGitHub, lib
-, tags ? [ "autopilotrpc" "signrpc" "walletrpc" "chainrpc" "invoicesrpc" "watchtowerrpc" ]
+{ buildGoModule
+, fetchFromGitHub
+, lib
+, tags ? [ "autopilotrpc" "signrpc" "walletrpc" "chainrpc" "invoicesrpc" "watchtowerrpc" "routerrpc" ]
 }:
 
 buildGoModule rec {
   pname = "lnd";
-  version = "0.10.3-beta";
+  version = "0.12.1-beta";
 
   src = fetchFromGitHub {
     owner = "lightningnetwork";
     repo = "lnd";
     rev = "v${version}";
-    sha256 = "129vi8z2sk4hagk7axa675nba6sbj9km88zlq8a1g8di7v2k9z6a";
+    sha256 = "0ly6909cg0qzdsp9idp1g7zqd6liw7f142d7n7vga64s1ksvv6lx";
   };
 
-  vendorSha256 = "0a4bk2qry0isnrvl0adwikqn6imxwzlaq5j3nglb5rmwwq2cdz0r";
+  vendorSha256 = "00q8dydskzg4rhxnnpzpbmmvc3q4wzm8z3dps2bv0nx3fk0fmrl3";
 
   subPackages = ["cmd/lncli" "cmd/lnd"];
 
@@ -32,7 +34,7 @@ buildGoModule rec {
   meta = with lib; {
     description = "Lightning Network Daemon";
     homepage = "https://github.com/lightningnetwork/lnd";
-    license = lib.licenses.mit;
-    maintainers = with maintainers; [ cypherpunk2140 ];
+    license = licenses.mit;
+    maintainers = with maintainers; [ cypherpunk2140 prusnak ];
   };
 }

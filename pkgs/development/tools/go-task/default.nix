@@ -2,16 +2,18 @@
 
 buildGoModule rec {
   pname = "go-task";
-  version = "2.8.1";
+  version = "3.4.2";
 
   src = fetchFromGitHub {
     owner = pname;
     repo = "task";
     rev = "v${version}";
-    sha256 = "1yf5s22q4hsxvgzrj4k6gbbq0whl5b9j12mbwimxaf53q535wy4q";
+    sha256 = "sha256-632ISkBIZJBJpybuiuRHOV3CAJg1rSe3hK+W7hmW2cM=";
   };
 
-  vendorSha256 = null;
+  vendorSha256 = "sha256-qKjCGZnCts4GfBafSRXR7xTvfJdqK8zjpu01eiyITkU=";
+
+  doCheck = false;
 
   subPackages = [ "cmd/task" ];
 
@@ -20,14 +22,13 @@ buildGoModule rec {
   ];
 
   postInstall = ''
-    mv $out/bin/task $out/bin/go-task
+    ln -s $out/bin/task $out/bin/go-task
   '';
 
   meta = with lib; {
     homepage = "https://taskfile.dev/";
     description = "A task runner / simpler Make alternative written in Go";
     license = licenses.mit;
-    platforms = platforms.all;
     maintainers = with maintainers; [ parasrah ];
   };
 }

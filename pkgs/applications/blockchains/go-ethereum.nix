@@ -1,18 +1,33 @@
-{ stdenv, buildGoModule, fetchFromGitHub, libobjc, IOKit }:
+{ lib, stdenv, buildGoModule, fetchFromGitHub, libobjc, IOKit }:
 
-buildGoModule rec {
+let
+  # A list of binaries to put into separate outputs
+  bins = [
+    "geth"
+  ];
+
+in buildGoModule rec {
   pname = "go-ethereum";
-  version = "1.9.18";
+  version = "1.10.3";
 
   src = fetchFromGitHub {
     owner = "ethereum";
     repo = pname;
     rev = "v${version}";
-    sha256 = "0nkzwmrzk0m9662cr18h5i54v07mw8v3fh0csvqx8n50z5fcvb7b";
+    sha256 = "sha256-85aUR7MvaPeRilC+4oj6XW2IEUvxRUsVz63tQ/Jc7xw=";
   };
 
   runVend = true;
-  vendorSha256 = "1744df059bjksvih4653nnvb4kb1xvzdhypd0nnz36m1wrihqssv";
+  vendorSha256 = "sha256-8zhVQ8FUdzog7h9RBfuq8uBp0zjulXbDOLAPljp4deA=";
+
+  doCheck = false;
+
+  outputs = [ "out" ] ++ bins;
+
+  # Move binaries to separate outputs and symlink them back to $out
+  postInstall = lib.concatStringsSep "\n" (
+    builtins.map (bin: "mkdir -p \$${bin}/bin && mv $out/bin/${bin} \$${bin}/bin/ && ln -s \$${bin}/bin/${bin} $out/bin/") bins
+  );
 
   subPackages = [
     "cmd/abidump"
@@ -29,17 +44,16 @@ buildGoModule rec {
     "cmd/puppeth"
     "cmd/rlpdump"
     "cmd/utils"
-    "cmd/wnode"
   ];
 
   # Fix for usb-related segmentation faults on darwin
   propagatedBuildInputs =
-    stdenv.lib.optionals stdenv.isDarwin [ libobjc IOKit ];
+    lib.optionals stdenv.isDarwin [ libobjc IOKit ];
 
-  meta = with stdenv.lib; {
+  meta = with lib; {
     homepage = "https://geth.ethereum.org/";
     description = "Official golang implementation of the Ethereum protocol";
-    license = with licenses; [ lgpl3 gpl3 ];
-    maintainers = with maintainers; [ adisbladis lionello xrelkd ];
+    license = with licenses; [ lgpl3Plus gpl3Plus ];
+    maintainers = with maintainers; [ adisbladis lionello xrelkd RaghavSood ];
   };
 }

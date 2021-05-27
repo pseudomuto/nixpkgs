@@ -43,7 +43,7 @@ xlink:href="https://github.com/NixOS/nixpkgs/blob/master/nixos/tests/login.nix">
   console, whether device ownership is correctly maintained when switching
   between consoles, and so on. On the other hand,
   <filename
-xlink:href="https://github.com/NixOS/nixpkgs/blob/master/nixos/tests/nfs.nix">nfs.nix</filename>,
+xlink:href="https://github.com/NixOS/nixpkgs/blob/master/nixos/tests/nfs/simple.nix">nfs/simple.nix</filename>,
   which tests NFS client and server functionality in the Linux kernel
   (including whether locks are maintained across server crashes), requires
   three machines: a server and two clients.
@@ -184,6 +184,25 @@ start_all()
       Take a picture of the display of the virtual machine, in PNG format. The
       screenshot is linked from the HTML log.
      </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>
+     <methodname>get_screen_text_variants</methodname>
+    </term>
+    <listitem>
+     <para>
+      Return a list of different interpretations of what is currently visible
+      on the machine's screen using optical character recognition. The number
+      and order of the interpretations is not specified and is subject to
+      change, but if no exception is raised at least one will be returned.
+     </para>
+     <note>
+      <para>
+       This requires passing <option>enableOCR</option> to the test attribute
+       set.
+      </para>
+     </note>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -350,7 +369,8 @@ start_all()
      <para>
       Wait until the supplied regular expressions matches the textual contents
       of the screen by using optical character recognition (see
-      <methodname>get_screen_text</methodname>).
+     <methodname>get_screen_text</methodname> and
+     <methodname>get_screen_text_variants</methodname>).
      </para>
      <note>
       <para>
@@ -448,6 +468,17 @@ import ./make-test-python.nix {
       <replaceable>Python code…</replaceable>
     '';
 }
+</programlisting>
+  This will produce a Nix warning at evaluation time. To fully disable the
+  linter, wrap the test script in comment directives to disable the Black linter
+  directly (again, don't commit this within the Nixpkgs repository):
+<programlisting>
+  testScript =
+    ''
+      # fmt: off
+      <replaceable>Python code…</replaceable>
+      # fmt: on
+    '';
 </programlisting>
  </para>
 </section>

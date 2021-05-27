@@ -1,4 +1,4 @@
-{ stdenv, buildGoModule, fetchFromGitHub }:
+{ lib, buildGoModule, fetchFromGitHub }:
 
 buildGoModule rec {
   pname = "go.rice";
@@ -13,11 +13,13 @@ buildGoModule rec {
 
   vendorSha256 = "0cb5phyl2zm1xnkhvisv0lzgknsi93yzmpayg30w7jc6z4icwnw7";
 
+  doCheck = false;
+
   subPackages = [ "." "rice" ];
 
-  meta = with stdenv.lib; {
+  meta = with lib; {
     homepage = "https://github.com/GeertJohan/go.rice";
-    description = "A Go package that makes working with resources such as html, js, css, images, templates very easy.";
+    description = "A Go package that makes working with resources such as html, js, css, images, templates very easy";
     license = licenses.bsd2;
     maintainers = with maintainers; [ blaggacao ];
   };

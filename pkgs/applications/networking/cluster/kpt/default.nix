@@ -2,20 +2,20 @@
 
 buildGoModule rec {
   pname = "kpt";
-  version = "0.32.0";
+  version = "0.38.0";
 
   src = fetchFromGitHub {
     owner = "GoogleContainerTools";
     repo = pname;
     rev = "v${version}";
-    sha256 = "1pgv15zgv30dpv148bn6x0anv9q6x78y6ldmzarb9fbjpk6j0wxl";
+    sha256 = "sha256-MBZa4LdpCZnVVbjzkYpPi9/CYGqVLeYy2N/AS1PSYBE=";
   };
 
-  vendorSha256 = "0l8xdnv2m6byd5dwvs3zgcj1lsci7ax4xvx178a8a78sgkqalvmq";
+  vendorSha256 = "sha256-P0cN8aw62nPD1OlUAw1E36YxptxtPqqruZfDDG4Ag2w=";
 
-  postInstall = ''
-    rm $out/bin/{mdtogo,formula}
-  '';
+  subPackages = [ "." ];
+
+  buildFlagsArray = [ "-ldflags=-s -w -X github.com/GoogleContainerTools/kpt/run.version=${version}" ];
 
   meta = with lib; {
     description = "A toolkit to help you manage, manipulate, customize, and apply Kubernetes Resource configuration data files";

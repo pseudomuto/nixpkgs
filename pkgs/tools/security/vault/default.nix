@@ -1,14 +1,14 @@
-{ stdenv, fetchFromGitHub, buildGoPackage, installShellFiles }:
+{ lib, fetchFromGitHub, buildGoPackage, installShellFiles, nixosTests }:
 
 buildGoPackage rec {
   pname = "vault";
-  version = "1.5.0";
+  version = "1.7.2";
 
   src = fetchFromGitHub {
     owner = "hashicorp";
     repo = "vault";
     rev = "v${version}";
-    sha256 = "1bdhcsx7hwz4kb68jrrrzlbr7k744g0pym996dq1p5rvz05j3pqc";
+    sha256 = "0nd77lfccl71qn98cq1yz85aiafplxbr58nafbbflijs1fz1771q";
   };
 
   goPackagePath = "github.com/hashicorp/vault";
@@ -24,11 +24,14 @@ buildGoPackage rec {
     installShellCompletion vault.bash
   '';
 
-  meta = with stdenv.lib; {
+  passthru.tests.vault = nixosTests.vault;
+
+  meta = with lib; {
     homepage = "https://www.vaultproject.io/";
     description = "A tool for managing secrets";
+    changelog = "https://github.com/hashicorp/vault/blob/v${version}/CHANGELOG.md";
     platforms = platforms.linux ++ platforms.darwin;
     license = licenses.mpl20;
-    maintainers = with maintainers; [ rushmorem lnl7 offline pradeepchhetri ];
+    maintainers = with maintainers; [ rushmorem lnl7 offline pradeepchhetri Chili-Man ];
   };
 }

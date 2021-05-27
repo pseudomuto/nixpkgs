@@ -1,4 +1,6 @@
-{ buildGoModule, fetchFromGitHub, lib, enableStatic ? false }:
+{ stdenv, buildGoModule, fetchFromGitHub, lib
+, enableStatic ? stdenv.hostPlatform.isStatic
+}:
 
 buildGoModule rec {
   pname = "gobetween";
@@ -10,8 +12,6 @@ buildGoModule rec {
     rev = version;
     sha256 = "0bxf89l53sqan9qq23rwawjkcanv9p61sw56zjqhyx78f0bh0zbc";
   };
-
-  deleteVendor = true;
 
   patches = [
     ./gomod.patch

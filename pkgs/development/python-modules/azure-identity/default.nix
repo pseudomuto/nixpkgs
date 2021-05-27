@@ -17,13 +17,12 @@
 
 buildPythonPackage rec {
   pname = "azure-identity";
-  version = "1.3.1";
-  disabled = isPy38;
+  version = "1.6.0";
 
   src = fetchPypi {
     inherit pname version;
     extension = "zip";
-    sha256 = "5a59c36b4b05bdaec455c390feda71b6495fc828246593404351b9a41c2e877a";
+    sha256 = "2e70b00874e4f288e37804bc06bfaf216de8565c759594bf79cccfbf9ca2c78a";
   };
 
   propagatedBuildInputs = [
@@ -37,11 +36,6 @@ buildPythonPackage rec {
     msrest
     msrestazure
   ];
-
-  prePatch = ''
-    substituteInPlace setup.py \
-      --replace msal-extensions~=0.1.3 msal-extensions
-  '';
 
   pythonImportsCheck = [ "azure.identity" ];
 

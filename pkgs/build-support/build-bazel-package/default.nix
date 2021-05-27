@@ -9,7 +9,7 @@ let
 in
 
 args@{
-  name
+  name ? "${args.pname}-${args.version}"
 , bazel ? bazelPkg
 , bazelFlags ? []
 , bazelBuildFlags ? []
@@ -37,6 +37,12 @@ args@{
 # Debian-specific /usr/share/java paths, but doesn't in the configured build).
 , fetchConfigured ? false
 
+# Don’t add Bazel --copt and --linkopt from NIX_CFLAGS_COMPILE /
+# NIX_LDFLAGS. This is necessary when using a custom toolchain which
+# Bazel wants all headers / libraries to come from, like when using
+# CROSSTOOL. Weirdly, we can still get the flags through the wrapped
+# compiler.
+, dontAddBazelOpts ? false
 , ...
 }:
 
@@ -102,8 +108,8 @@ in stdenv.mkDerivation (fBuildAttrs // {
       rm -rf $bazelOut/external/{bazel_tools,\@bazel_tools.marker}
       ${if removeRulesCC then "rm -rf $bazelOut/external/{rules_cc,\\@rules_cc.marker}" else ""}
       rm -rf $bazelOut/external/{embedded_jdk,\@embedded_jdk.marker}
-      ${if removeLocalConfigCc then "rm -rf $bazelOut/external/{local_config_cc,\@local_config_cc.marker}" else ""}
-      ${if removeLocal then "rm -rf $bazelOut/external/{local_*,\@local_*.marker}" else ""}
+      ${if removeLocalConfigCc then "rm -rf $bazelOut/external/{local_config_cc,\\@local_config_cc.marker}" else ""}
+      ${if removeLocal then "rm -rf $bazelOut/external/{local_*,\\@local_*.marker}" else ""}
 
       # Clear markers
       find $bazelOut/external -name '@*\.marker' -exec sh -c 'echo > {}' \;
@@ -166,9 +172,13 @@ in stdenv.mkDerivation (fBuildAttrs // {
 
     chmod -R +w $bazelOut
     find $bazelOut -type l | while read symlink; do
-      ln -sf $(readlink "$symlink" | sed "s,NIX_BUILD_TOP,$NIX_BUILD_TOP,") "$symlink"
+      if [[ $(readlink "$symlink") == *NIX_BUILD_TOP* ]]; then
+        ln -sf $(readlink "$symlink" | sed "s,NIX_BUILD_TOP,$NIX_BUILD_TOP,") "$symlink"
+      fi
     done
   '' + fBuildAttrs.preConfigure or "";
+
+  inherit dontAddBazelOpts;
 
   buildPhase = fBuildAttrs.buildPhase or ''
     runHook preBuild
@@ -181,20 +191,22 @@ in stdenv.mkDerivation (fBuildAttrs // {
     #
     copts=()
     host_copts=()
-    for flag in $NIX_CFLAGS_COMPILE; do
-      copts+=( "--copt=$flag" )
-      host_copts+=( "--host_copt=$flag" )
-    done
-    for flag in $NIX_CXXSTDLIB_COMPILE; do
-      copts+=( "--copt=$flag" )
-      host_copts+=( "--host_copt=$flag" )
-    done
     linkopts=()
     host_linkopts=()
-    for flag in $NIX_LDFLAGS; do
-      linkopts+=( "--linkopt=-Wl,$flag" )
-      host_linkopts+=( "--host_linkopt=-Wl,$flag" )
-    done
+    if [ -z "''${dontAddBazelOpts:-}" ]; then
+      for flag in $NIX_CFLAGS_COMPILE; do
+        copts+=( "--copt=$flag" )
+        host_copts+=( "--host_copt=$flag" )
+      done
+      for flag in $NIX_CXXSTDLIB_COMPILE; do
+        copts+=( "--copt=$flag" )
+        host_copts+=( "--host_copt=$flag" )
+      done
+      for flag in $NIX_LDFLAGS; do
+        linkopts+=( "--linkopt=-Wl,$flag" )
+        host_linkopts+=( "--host_linkopt=-Wl,$flag" )
+      done
+    fi
 
     BAZEL_USE_CPP_ONLY_TOOLCHAIN=1 \
     USER=homeless-shelter \

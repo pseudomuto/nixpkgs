@@ -1,22 +1,22 @@
-{ lib, pkgconfig, rustPlatform, fetchFromGitHub, openssl }:
+{ lib, pkg-config, rustPlatform, fetchFromGitHub, openssl }:
 
 rustPlatform.buildRustPackage rec {
   pname = "cargo-tarpaulin";
-  version = "0.14.2";
+  version = "0.17.0";
 
   src = fetchFromGitHub {
     owner = "xd009642";
     repo = "tarpaulin";
-    rev = "${version}";
-    sha256 = "1skiaiz3xyi6cf62fkg7i7ahncm7vcg3aq4s4a5lrls30gr0n288";
+    rev = version;
+    sha256 = "1z104cd3wg718x1d89znppx4h6f0c6icgmpcllyrd0d19lb71a2b";
   };
 
   nativeBuildInputs = [
-    pkgconfig
+    pkg-config
   ];
   buildInputs = [ openssl ];
 
-  cargoSha256 = "1klmdwpqk995pdyms40x7gk4l2mf4ncj7cgknl91kmyvpn4j1y4g";
+  cargoSha256 = "1hpi9aifn3g19yqkb58lphyw8cbsqllhg5dzbqx15hcfvrb7ip4k";
   #checkFlags = [ "--test-threads" "1" ];
   doCheck = false;
 

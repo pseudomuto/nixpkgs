@@ -1,4 +1,5 @@
 { stdenv
+, lib
 , makeWrapper
 , wrapGAppsHook
 , autoPatchelfHook
@@ -21,13 +22,14 @@
 , expat
 , udev
 , libnotify
-, xdg_utils
+, xdg-utils
+, mesa
 }:
 
 # Helper function for building a derivation for Franz and forks.
 
 { pname, name, version, src, meta }:
-stdenv.mkDerivation {
+stdenv.mkDerivation rec {
   inherit pname version src meta;
 
   # Don't remove runtime deps.
@@ -47,6 +49,7 @@ stdenv.mkDerivation {
     libXtst
     libXScrnSaver
   ]) ++ [
+    mesa #libgbm
     gtk3
     atk
     glib
@@ -64,7 +67,7 @@ stdenv.mkDerivation {
     expat
     stdenv.cc.cc
   ];
-  runtimeDependencies = [ udev.lib libnotify ];
+  runtimeDependencies = [ stdenv.cc.cc.lib (lib.getLib udev) libnotify ];
 
   unpackPhase = "dpkg-deb -x $src .";
 
@@ -83,7 +86,8 @@ stdenv.mkDerivation {
 
   postFixup = ''
     wrapProgram $out/opt/${name}/${pname} \
-      --prefix PATH : ${xdg_utils}/bin \
+      --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath runtimeDependencies}" \
+      --prefix PATH : ${xdg-utils}/bin \
       "''${gappsWrapperArgs[@]}"
   '';
 }

@@ -1,46 +1,43 @@
-{ stdenv
+{ lib
+, stdenv
 , pkgs
+, rustPackages
 , fetchFromGitHub
 , rustPlatform
-  # Updater script
-, runtimeShell
 , writers
-  # Tests
 , nixosTests
-  # Apple dependencies
 , CoreServices
 , Security
 }:
 
-(rustPlatform.buildRustPackage rec {
-  pname = "lorri";
-  version = "1.1.1";
+let
+  # Run `eval $(nix-build -A lorri.updater)` after updating the revision!
+  version = "1.5.0";
+  gitRev = "f4b6a135e2efb18b3a679e3946d4d070a1c45a2c";
+  sha256 = "0irgzw7vwhvm97nmylj44x2dnd8pwf47gvlgw7fj58fj67a0l8fr";
+  cargoSha256 = "18l7yxciqcvagsg9lykilfhr104a4qqdydjkjysxgd197xalxgzr";
 
-  meta = with stdenv.lib; {
-    description = "Your project's nix-env";
-    homepage = "https://github.com/target/lorri";
-    license = licenses.asl20;
-    maintainers = with maintainers; [ grahamc Profpatsch ];
-  };
+in (rustPlatform.buildRustPackage rec {
+  pname = "lorri";
+  inherit version;
 
   src = fetchFromGitHub {
-    owner = "target";
+    owner = "nix-community";
     repo = pname;
-    # Run `eval $(nix-build -A lorri.updater)` after updating the revision!
-    # ALSO don’t forget to update the cargoSha256!
-    rev = "05ea21170a18800e83b3dcf1e3d347f83a9fa992";
-    sha256 = "1lgig5q1anmmmc1i1qnbx8rd8mqvm5csgnlaxlj4l4rxjmgiv06n";
+    rev = gitRev;
+    inherit sha256;
   };
 
-  cargoSha256 = "16asbpq47f3zcv4j9rzqx9v1317qz7xjr7dxd019vpr88zyk4fi1";
+  outputs = [ "out" "man" "doc" ];
+
+  inherit cargoSha256;
   doCheck = false;
 
   BUILD_REV_COUNT = src.revCount or 1;
-  RUN_TIME_CLOSURE = pkgs.callPackage ./runtime.nix {};
+  RUN_TIME_CLOSURE = pkgs.callPackage ./runtime.nix { };
 
-  nativeBuildInputs = with pkgs; [ rustPackages.rustfmt ];
-  buildInputs =
-    stdenv.lib.optionals stdenv.isDarwin [ CoreServices Security ];
+  nativeBuildInputs = [ rustPackages.rustfmt ];
+  buildInputs = lib.optionals stdenv.isDarwin [ CoreServices Security ];
 
   # copy the docs to the $man and $doc outputs
   postInstall = ''
@@ -63,7 +60,11 @@
       nixos = nixosTests.lorri;
     };
   };
-}).overrideAttrs (old: {
-  # add man and doc outputs to put our documentation into
-  outputs = old.outputs or [ "out" ] ++ [ "man" "doc" ];
+
+  meta = with lib; {
+    description = "Your project's nix-env";
+    homepage = "https://github.com/target/lorri";
+    license = licenses.asl20;
+    maintainers = with maintainers; [ grahamc Profpatsch ];
+  };
 })

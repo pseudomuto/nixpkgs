@@ -1,11 +1,11 @@
-{ pkgs, stdenv, fetchurl, dpkg, jre_headless, nixosTests }:
+{ lib, stdenv, fetchurl, dpkg, jre_headless, nixosTests }:
 
 let
   pname = "jicofo";
-  version = "1.0-589";
+  version = "1.0-690";
   src = fetchurl {
     url = "https://download.jitsi.org/stable/${pname}_${version}-1_all.deb";
-    sha256 = "0bsagnmw2rxf9s9kjl4y7gfqx408iv0qlwgy3mz0339g5503p5r9";
+    sha256 = "1w5nz2p6scd7w0ac93vhxlk5i8in5160c0icwl27m4x4km9xf6al";
   };
 in
 stdenv.mkDerivation {
@@ -16,6 +16,7 @@ stdenv.mkDerivation {
   unpackCmd = "${dpkg}/bin/dpkg-deb -x $src debcontents";
 
   installPhase = ''
+    runHook preInstall
     substituteInPlace usr/share/jicofo/jicofo.sh \
       --replace "exec java" "exec ${jre_headless}/bin/java"
 
@@ -24,20 +25,21 @@ stdenv.mkDerivation {
     mv etc $out/
     cp ${./logging.properties-journal} $out/etc/jitsi/jicofo/logging.properties-journal
     ln -s $out/share/jicofo/jicofo.sh $out/bin/jicofo
+    runHook postInstall
   '';
 
   passthru.tests = {
     single-node-smoke-test = nixosTests.jitsi-meet;
   };
 
-  meta = with stdenv.lib; {
+  meta = with lib; {
     description = "A server side focus component used in Jitsi Meet conferences";
     longDescription = ''
       JItsi COnference FOcus is a server side focus component used in Jitsi Meet conferences.
     '';
     homepage = "https://github.com/jitsi/jicofo";
     license = licenses.asl20;
-    maintainers = with maintainers; [ ];
+    maintainers = teams.jitsi.members;
     platforms = platforms.linux;
   };
 }

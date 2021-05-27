@@ -1,4 +1,4 @@
-{ stdenv
+{ lib
 , buildGoPackage
 , fetchFromGitHub
 , makeWrapper
@@ -6,7 +6,7 @@
 
 buildGoPackage rec {
   pname = "docker-slim";
-  version = "1.30.0";
+  version = "1.35.0";
 
   goPackagePath = "github.com/docker-slim/docker-slim";
 
@@ -14,7 +14,7 @@ buildGoPackage rec {
     owner = "docker-slim";
     repo = "docker-slim";
     rev = version;
-    sha256 = "10w5v0qqj8yqd81hpz65pq1lx0j9pl112s7hl6y9p3i3f0m0931f";
+    sha256 = "0j350rhyav844vhaa1f5idffflgs5h3c5zcazly9s5sf4invm49y";
   };
 
   subPackages = [ "cmd/docker-slim" "cmd/docker-slim-sensor" ];
@@ -36,10 +36,11 @@ buildGoPackage rec {
     wrapProgram "$out/bin/docker-slim" --add-flags '--state-path "$(pwd)"'
   '';
 
-  meta = with stdenv.lib; {
+  meta = with lib; {
     description = "Minify and secure Docker containers";
     homepage = "https://dockersl.im/";
+    changelog = "https://github.com/docker-slim/docker-slim/blob/${version}/CHANGELOG.md";
     license = licenses.asl20;
-    maintainers = with maintainers; [ filalex77 marsam mbrgm ];
+    maintainers = with maintainers; [ Br1ght0ne marsam mbrgm ];
   };
 }

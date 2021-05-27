@@ -1,11 +1,11 @@
-{ stdenv, fetchurl, dpkg, jre_headless, nixosTests }:
+{ lib, stdenv, fetchurl, makeWrapper, dpkg, jre_headless, nixosTests }:
 
 let
   pname = "jitsi-videobridge2";
-  version = "2.1-202-g5f9377b9";
+  version = "2.1-416-g2f43d1b4";
   src = fetchurl {
     url = "https://download.jitsi.org/stable/${pname}_${version}-1_all.deb";
-    sha256 = "16xj4m6kz4di6y3vxrjkwajd7sfm92zzhrc6q9ljmrwiqnly5z0a";
+    sha256 = "0s9wmbba1nlpxaawzmaqg92882y5sfs2ws64w5sqvpi7n77hy54m";
   };
 in
 stdenv.mkDerivation {
@@ -15,7 +15,10 @@ stdenv.mkDerivation {
 
   unpackCmd = "${dpkg}/bin/dpkg-deb -x $src debcontents";
 
+  nativeBuildInputs = [ makeWrapper ];
+
   installPhase = ''
+    runHook preInstall
     substituteInPlace usr/share/jitsi-videobridge/jvb.sh \
       --replace "exec java" "exec ${jre_headless}/bin/java"
 
@@ -24,13 +27,18 @@ stdenv.mkDerivation {
     cp ${./logging.properties-journal} $out/etc/jitsi/videobridge/logging.properties-journal
     mv usr/share/jitsi-videobridge/* $out/share/jitsi-videobridge/
     ln -s $out/share/jitsi-videobridge/jvb.sh $out/bin/jitsi-videobridge
+
+    # work around https://github.com/jitsi/jitsi-videobridge/issues/1547
+    wrapProgram $out/bin/jitsi-videobridge \
+      --set VIDEOBRIDGE_GC_TYPE G1GC
+    runHook postInstall
   '';
 
   passthru.tests = {
     single-host-smoke-test = nixosTests.jitsi-meet;
   };
 
-  meta = with stdenv.lib; {
+  meta = with lib; {
     description = "A WebRTC compatible video router";
     longDescription = ''
       Jitsi Videobridge is an XMPP server component that allows for multiuser video communication.
@@ -41,7 +49,7 @@ stdenv.mkDerivation {
     '';
     homepage = "https://github.com/jitsi/jitsi-videobridge";
     license = licenses.asl20;
-    maintainers = with maintainers; [ ];
+    maintainers = teams.jitsi.members;
     platforms = platforms.linux;
   };
 }
